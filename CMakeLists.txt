@@ -17,4 +17,8 @@ set(SOURCE_FILES
     solver.c
     solver.h)
 
+
+
 add_executable(deepflow_release1_0_1 ${SOURCE_FILES})
+
+target_link_libraries(deepflow_release1_0_1 jpeg m png)

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <jpeglib.h>
 #include <assert.h>
-#include <setjmp.h>
+//#include <setjmp.h>
 #include <png.h>
 #include "io.h"
 
