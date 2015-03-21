@@ -1,0 +1,61 @@
+DeepFlow, v1.0.1
+
+Our code is mentioned only for scientific or personal use.
+Please contact us for commercial use.
+
+### Compiling ###
+
+Simply type 'make' and the code must compile.
+The program was only tested under a 64-bit Linux distribution.
+We do not give any support for other OS.
+
+### Using DeepFlow ###
+
+You can use DeepFlow without any input matches.
+The general command to use DeepFlow is:
+./deepflow <im1> <im2> <filename.flo> [options]
+
+For a list of the available options, you can type ./deepflow -h
+You can basically set some parameters, or directly use the parameter we use in the ICCV 2013 paper for MPI-Sintel, Middlebury or KITTI.
+The option -match and -matchf allows to give input matches, either from an input file or from stdin.
+
+### Example including deep matching ###
+
+To test DeepFlow including the deep matching, you need to download the deep matching code on Jerome Revaud's webpage: http://lear.inrialpes.fr/people/revaud
+The matches output by deep matching can directly be piped to DeepFlow like in the following example:
+
+<deepmatching_path>/deepmatching sintel1.png sintel2.png -iccv_settings | python <deepmatching_path>/rescore.py sintel1.png sintel2.png | ./deepflow sintel1.png sintel2.png sintel.flo -matchf -sintel
+
+It creates a .flo file in a usual format. 
+For instance, code for reading and displaying such format is available with the Middlebury dataset.
+
+The matches are similar to the one we use in ICCV'13 paper. If you need exactly the same, you can download them on the webpage.
+If you want better results, just replace -iccv_settings by -improved_settings.
+
+### Bugs and extensions ###
+
+If you find bugs, etc., please feel free to contact me.
+Contact details are available on my webpage.
+http://lear.inrialpes.fr/people/pweinzae
+
+### History ###
+
+Dec 2013: v1.0.0 
+Mar 2014: v1.0.1 memory leak fix + support for png images
+
+### LICENCE CONDITIONS ###
+
+Copyright (C) 2013 Philippe Weinzaepfel
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
