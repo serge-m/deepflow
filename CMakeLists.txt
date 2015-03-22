@@ -33,9 +33,16 @@ set(LIB_SOURCE_FILES
     io.c
     io.h
     image.h
-    image.c)
-add_library(my_lib SHARED ${LIB_SOURCE_FILES})
+    image.c
+    opticalflow.c
+    opticalflow.h
+    opticalflow_aux.c
+    opticalflow_aux.h
+    solver.c
+    solver.h
+    )
+add_library(libdeepflow SHARED ${LIB_SOURCE_FILES})
 
-target_link_libraries(my_lib jpeg m png)
-set_target_properties(my_lib PROPERTIES PREFIX "" OUTPUT_NAME "my_lib")
+target_link_libraries(libdeepflow jpeg m png)
+set_target_properties(libdeepflow PROPERTIES PREFIX "" OUTPUT_NAME "libdeepflow")
 #caffe_default_properties(pycaffe)
