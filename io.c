@@ -9,11 +9,9 @@
 /* FLOW */
 
 /* read a flow file and returns a pointer with two images containing the flow along x and y axis */
-image_t** readFlowFile(const char* filename)
-{
+image_t** readFlowFile(const char* filename){
     FILE *fid = fopen(filename, "rb");
-    if (fid == 0)
-    {
+    if (fid == 0){
         fprintf(stderr,"readFlow() error: could not open file  %s\n",filename);
         exit(1);
     }
@@ -27,35 +25,31 @@ image_t** readFlowFile(const char* filename)
     flow[1] = image_new(aXSize, aYSize);
     int x,y;
     for (y = 0; y < aYSize; y++)
-        for (x = 0; x < aXSize ; x++)
-        {
+        for (x = 0; x < aXSize ; x++) {
             fread(&(flow[0]->data[y*flow[0]->stride+x]),sizeof(float),1,fid);
             fread(&(flow[1]->data[y*flow[0]->stride+x]),sizeof(float),1,fid);
-        }
+    }
     fclose(fid);
     return flow;
 }
 
 /* write a flow to a file */
-void writeFlowFile(const char *filename, const image_t *flowx, const image_t *flowy)
-{
+void writeFlowFile(const char *filename, const image_t *flowx, const image_t *flowy){
     FILE *stream = fopen(filename, "wb");
-    if (stream == 0)
-    {
-        printf("Error while opening %s\n",filename);
+    if (stream == 0){
+        fprintf(stderr, "Error while opening %s\n",filename);
         exit(1);
     }
-    float help=202021.25;
+    const float help=202021.25;
     fwrite(&help,sizeof(float),1,stream);
-    int aXSize = flowx->width, aYSize = flowx->height;
+    const int aXSize = flowx->width, aYSize = flowx->height;
     fwrite(&aXSize,sizeof(int),1,stream);
     fwrite(&aYSize,sizeof(int),1,stream);
     int y,x;
     for (y = 0; y < aYSize ; y++)
-        for (x = 0; x < aXSize ; x++)
-        {
-            fwrite(&flowx->data[y*flowx->stride+x],sizeof(float),1,stream);
-            fwrite(&flowy->data[y*flowy->stride+x],sizeof(float),1,stream);
+        for (x = 0; x < aXSize ; x++) {
+	        fwrite(&flowx->data[y*flowx->stride+x],sizeof(float),1,stream);
+	        fwrite(&flowy->data[y*flowy->stride+x],sizeof(float),1,stream);
         }
     fclose(stream);
 }
@@ -64,43 +58,34 @@ void writeFlowFile(const char *filename, const image_t *flowx, const image_t *fl
 
 // PPM
 
-typedef struct
-{
+typedef struct{
     int magic;
     int width;
     int height;
     int pixmax;
 } ppm_hdr_t;
 
-static void get_magic(FILE *fp, ppm_hdr_t *ppm_hdr)
-{
+static void get_magic(FILE *fp, ppm_hdr_t *ppm_hdr){
     char str[1024];
     fgets(str, 1024, fp);
-    if(str[0] == 'P' && (str[1] <= '6' || str[1] >= '1'))
-    {
+    if(str[0] == 'P' && (str[1] <= '6' || str[1] >= '1')){
         ppm_hdr->magic = str[1] - '0';
     }
 }
 
-static int skip_comment(FILE *fp)
-{
+static int skip_comment(FILE *fp){
     char c;
-    do
-    {
+    do{
         c = (char) fgetc(fp);
-    }
-    while (c == ' ' || c == '\t' || c == '\n');
-    if(c == '#')
-    {
-        do
-        {
+    } 
+	while (c == ' ' || c == '\t' || c == '\n');
+    if(c == '#'){
+        do {
             c = (char) fgetc(fp);
 
         } while(c != 0x0A);
         return 1;
-    }
-    else
-    {
+    }else{
         ungetc(c, fp);
     }
     return 0;
@@ -108,18 +93,15 @@ static int skip_comment(FILE *fp)
 
 /*----------------------------------------------------------------------------*/
 
-static void skip_comments(FILE *fp)
-{
+static void skip_comments(FILE *fp){
     while(skip_comment(fp));
 }
 
 /*----------------------------------------------------------------------------*/
 
-static int get_image_size(FILE *fp, ppm_hdr_t *ppm_hdr)
-{
+static int get_image_size(FILE *fp, ppm_hdr_t *ppm_hdr){
     skip_comments(fp);
-    if(fscanf(fp, "%d %d", &ppm_hdr->width, &ppm_hdr->height) != 2)
-    {
+    if(fscanf(fp, "%d %d", &ppm_hdr->width, &ppm_hdr->height) != 2){
         fprintf(stderr, "Warning: PGM --> File currupted\n");
         return 0;
     }
@@ -128,14 +110,11 @@ static int get_image_size(FILE *fp, ppm_hdr_t *ppm_hdr)
 
 /*----------------------------------------------------------------------------*/
 
-static int get_pixmax(FILE *fp, ppm_hdr_t *ppm_hdr)
-{
+static int get_pixmax(FILE *fp, ppm_hdr_t *ppm_hdr){
     skip_comments(fp);
     ppm_hdr->pixmax = 1;
-    if(ppm_hdr->magic == 2 || ppm_hdr->magic == 3 || ppm_hdr->magic == 5 || ppm_hdr->magic == 6)
-    {
-        if(fscanf(fp, "%d", &ppm_hdr->pixmax) != 1)
-        {
+    if(ppm_hdr->magic == 2 || ppm_hdr->magic == 3 || ppm_hdr->magic == 5 || ppm_hdr->magic == 6){
+        if(fscanf(fp, "%d", &ppm_hdr->pixmax) != 1){
             fprintf(stderr, "Warning: PGM --> pixmax not valid\n");
             return 0;
         }
@@ -146,47 +125,42 @@ static int get_pixmax(FILE *fp, ppm_hdr_t *ppm_hdr)
 
 /*----------------------------------------------------------------------------*/
 
-static int get_ppm_hdr(FILE *fp, ppm_hdr_t *ppm_hdr)
-{
+static int get_ppm_hdr(FILE *fp, ppm_hdr_t *ppm_hdr){
     get_magic(fp, ppm_hdr);
-    if(!get_image_size(fp, ppm_hdr))
-    {
+    if(!get_image_size(fp, ppm_hdr)){
         return 0;
     }
-    if(!get_pixmax(fp, ppm_hdr))
-    {
+    if(!get_pixmax(fp, ppm_hdr)){
         return 0;
     }
     return 1;
 }
 
-static void raw_read_color(FILE *fp, color_image_t *image)
-{
-    int i, size=image->height*image->width;
-    for(i=0;i<size;i++)
-    {
-        image->c1[i]=(float) fgetc(fp);
-        image->c2[i]=(float) fgetc(fp);
-        image->c3[i]=(float) fgetc(fp);
+static void raw_read_color(FILE *fp, color_image_t *image){
+    int j;
+    for( j=0 ; j<image->height ; j++){
+        int o = j*image->stride, i;
+        for( i=0 ; i<image->width ; i++,o++ ){
+            image->c1[o] = (float) fgetc(fp);
+            image->c2[o] = (float) fgetc(fp);
+            image->c3[o] = (float) fgetc(fp);
+        }
     }
 }
 
-color_image_t *color_image_pnm_load(FILE *fp)
-{
+color_image_t *color_image_pnm_load(FILE *fp){
     color_image_t *image = NULL;
     ppm_hdr_t ppm_hdr;
-    if(!get_ppm_hdr(fp, &ppm_hdr))
-    {
+    if(!get_ppm_hdr(fp, &ppm_hdr)) 	{
         return NULL;
     }
-    switch(ppm_hdr.magic)
-    {
+    switch(ppm_hdr.magic)    {
         case 1: /* PBM ASCII */
         case 2: /* PGM ASCII */
         case 3: /* PPM ASCII */
         case 4: /* PBM RAW */
         case 5: /* PGM RAW */
-            fprintf(stderr, "color_image_pnm_load: only PPM raw with maxval 255 supported\n");
+            fprintf(stderr, "color_image_pnm_load: only PPM raw with maxval 255 supported\n");            
             break;
         case 6: /* PPM RAW */
             image = color_image_new(ppm_hdr.width, ppm_hdr.height);
@@ -198,8 +172,7 @@ color_image_t *color_image_pnm_load(FILE *fp)
 
 // JPG
 
-color_image_t *color_image_jpeg_load(FILE *fp)
-{
+color_image_t *color_image_jpeg_load(FILE *fp){
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     JSAMPARRAY buffer;
@@ -215,30 +188,30 @@ color_image_t *color_image_jpeg_load(FILE *fp)
     cinfo.out_color_space = JCS_RGB;
     cinfo.quantize_colors = FALSE;
     image = color_image_new(cinfo.image_width, cinfo.image_height);
-    if(image == NULL)
-    {
+    if(image == NULL){
         return NULL;
     }
     jpeg_start_decompress(&cinfo);
     row_stride = cinfo.output_width * cinfo.output_components;
     buffer = (*cinfo.mem->alloc_sarray)
-            ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
     r_p = image->c1;
     g_p = image->c2;
     b_p = image->c3;
 
-    while (cinfo.output_scanline < cinfo.output_height)
-    {
+    const int incr_line = image->stride-image->width;
+
+    while (cinfo.output_scanline < cinfo.output_height){
         jpeg_read_scanlines(&cinfo, buffer, 1);
         buffer_p = buffer[0];
         index = cinfo.output_width;
-        while(index--)
-        {
+        while(index--){
             *r_p++ = (float) *buffer_p++;
             *g_p++ = (float) *buffer_p++;
             *b_p++ = (float) *buffer_p++;
         }
+        r_p += incr_line; g_p += incr_line; b_p += incr_line;
     }
     jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
@@ -251,20 +224,20 @@ color_image_t *color_image_png_load( FILE* fp, const char* file_name ){
     // read the header
     png_byte header[8];
     fread(header, 1, 8, fp);
-
+    
     if (png_sig_cmp(header, 0, 8)){
         fprintf(stderr, "error: %s is not a PNG.\n", file_name);
         fclose(fp);
         return 0;
     }
-
+    
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png_ptr){
         fprintf(stderr, "error: png_create_read_struct returned 0.\n");
         fclose(fp);
         return 0;
     }
-
+    
     // create png info struct
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr){
@@ -273,7 +246,7 @@ color_image_t *color_image_png_load( FILE* fp, const char* file_name ){
         fclose(fp);
         return 0;
     }
-
+    
     // create png info struct
     png_infop end_info = png_create_info_struct(png_ptr);
     if (!end_info){
@@ -306,7 +279,7 @@ color_image_t *color_image_png_load( FILE* fp, const char* file_name ){
 
     // get info about png
     png_get_IHDR(png_ptr, info_ptr, &temp_width, &temp_height, &bit_depth, &color_type,
-            NULL, NULL, NULL);
+        NULL, NULL, NULL);
 
     // Update the png info struct.
     png_read_update_info(png_ptr, info_ptr);
@@ -330,35 +303,40 @@ color_image_t *color_image_png_load( FILE* fp, const char* file_name ){
 
     // read the png into image_data through row_pointers
     png_read_image(png_ptr, row_pointers);
-
+    
     // copy into color image
     color_image_t* image = color_image_new(temp_width,temp_height);
     if( color_type==0 ) {
-        assert((unsigned)rowbytes == temp_width || !"error: not a proper gray png image");
-        for(i=0; i<temp_width*temp_height; i++)
-            image->c1[i] = image->c2[i] = image->c3[i] = image_data[i];
+      assert((unsigned)rowbytes == temp_width || !"error: not a proper gray png image");
+      for(i=0; i<temp_height; i++){
+        int j;
+        for(j=0; j<temp_width; j++)
+            image->c1[i*image->stride+j] = image->c2[i*image->stride+j] = image->c3[i*image->stride+j] = image_data[i*image->width+j];
+      }
     } else if( color_type == 2 ) {
-        assert((unsigned)rowbytes == 3*temp_width || !"error: not a proper color png image");
-        for(i=0; i<temp_width*temp_height; i++) {
-            image->c1[i] = image_data[3*i+0];
-            image->c2[i] = image_data[3*i+1];
-            image->c3[i] = image_data[3*i+2];
+      assert((unsigned)rowbytes == 3*temp_width || !"error: not a proper color png image");
+      for(i=0; i<temp_height; i++) {
+        int j;
+        for(j=0; j<temp_width; j++){
+          image->c1[i*image->stride+j] = image_data[3*(i*image->width+j)+0];
+          image->c2[i*image->stride+j] = image_data[3*(i*image->width+j)+1];
+          image->c3[i*image->stride+j] = image_data[3*(i*image->width+j)+2];
         }
+      }
     } else
-        assert(!"error: unknown PNG color type" );
-
+      assert(!"error: unknown PNG color type" );
+    
     // clean up
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
     free(row_pointers);
-
+    
     return image;
 }
 
 // GENERAL LOAD
 
 /* load a color image from a file */
-color_image_t *color_image_load(const char *fname)
-{
+color_image_t *color_image_load(const char *fname){
     FILE *fp;
     char magic[2];
     unsigned short *magic_short = (unsigned short *) magic;
@@ -371,14 +349,11 @@ color_image_t *color_image_load(const char *fname)
     rewind(fp);
     if(magic_short[0] == 0xd8ff){
         image = color_image_jpeg_load(fp);
-    }
-    else if(magic[0]=='P' && (magic[1]=='6' || magic[1]=='5')) { /* PPM raw */
+    } else if(magic[0]=='P' && (magic[1]=='6' || magic[1]=='5')){ /* PPM raw */
         image = color_image_pnm_load(fp);
-    }
-    else if( magic[0]==-119 && magic[1]=='P' ) {
-        image = color_image_png_load( fp, fname );
-    }
-    else {
+    } else if( magic[0]==-119 && magic[1]=='P' ) {
+      image = color_image_png_load( fp, fname );
+    } else{
         fprintf(stderr, "Error in color_image_load(%s) - image format not supported, can only read jpg or ppm\n",fname);
         exit(1);
     }

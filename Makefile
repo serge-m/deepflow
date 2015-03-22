@@ -1,16 +1,16 @@
-CC=gcc
+CC=g++
 
-CFLAGS=-Wall -g -O3
-LDFLAGS=-g -Wall -O3
+CFLAGS=-Wall -g -O3 -msse4
+LDFLAGS=-g -Wall -O3 -msse4
 LIBFLAGS=-lm -ljpeg -lpng
-LIBAFLAGS=-static /usr/lib64/libjpeg.a /usr/lib64/libpng.a /usr/lib64/libz.a /usr/lib64/libm.a
+LIBAFLAGS=-static /usr/lib/libjpeg.a /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libm.a
 
-all: deepflow
+all: fastdeepflow
 
-deepflow: deepflow.o image.o io.o opticalflow_aux.o opticalflow.o solver.o
-	$(CC) $(LDFLAGS) $(LIBFLAGS) -o $@ $^
+fastdeepflow: deepflow.o image.o io.o opticalflow_aux.o opticalflow.o solver.o
+	$(CC) $(LDFLAGS)  -o $@ $^ $(LIBFLAGS)
 
-deepflow-static: deepflow.o image.o io.o opticalflow_aux.o opticalflow.o solver.o
+fastdeepflow-static: deepflow.o image.o io.o opticalflow_aux.o opticalflow.o solver.o
 	$(CC) $(LIBFLAGS) -o $@ $^ $(LIBAFLAGS)
 
 %.o: %.c
