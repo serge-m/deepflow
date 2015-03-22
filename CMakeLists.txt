@@ -3,6 +3,10 @@ project(deepflow_release1_0_1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 set(SOURCE_FILES
     deepflow.c
     image.c
@@ -23,3 +27,14 @@ add_executable(deepflow_release1_0_1 ${SOURCE_FILES})
 
 target_link_libraries(deepflow_release1_0_1 jpeg m png)
 
+
+set(LIB_SOURCE_FILES
+    io.c
+    io.h
+    image.h
+    image.c)
+add_library(my_lib SHARED ${LIB_SOURCE_FILES})
+
+target_link_libraries(my_lib jpeg m png)
+set_target_properties(my_lib PROPERTIES PREFIX "" OUTPUT_NAME "my_lib")
+#caffe_default_properties(pycaffe)
