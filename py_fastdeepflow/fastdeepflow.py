@@ -67,7 +67,7 @@ def numpy_from_color_image_t_1(img_t):
 
 def numpy_from_color_image_t(img_t):
     shape=(3, img_t.height, img_t.stride)
-    return numpy.ctypeslib.as_array(img_t.c1, shape=shape).transpose(1,2,0)[:,:,:img_t.width]
+    return numpy.ctypeslib.as_array(img_t.c1, shape=shape).transpose(1,2,0)[:,:,:img_t.width].copy()
 
 
 
