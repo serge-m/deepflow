@@ -35,5 +35,20 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(numpy.allclose(u, u1, atol=1e-8))
         self.assertTrue(numpy.allclose(v, v1, atol=1e-8))
 
+    def test_wrap(self):
+        img0 = cv2.imread(path_dir_data + 'sintel1.png')[:,:,::-1]
+        img1 = cv2.imread(path_dir_data + 'sintel2.png')[:,:,::-1]
+        u, v = fastdeepflow.calc_flow(img0, img1)
+        img0warped = fastdeepflow.warp_image(img0, u, v)
+        img1warped = fastdeepflow.warp_image(img1, u, v)
+        
+        d01 = numpy.sum(numpy.abs(img0-img1.astype('float32')))
+        d0w1= numpy.sum(numpy.abs(img0warped-img1))
+        d01w= numpy.sum(numpy.abs(img0-img1warped))
+        print "d01 {}, d0w1 {}, d01w {}".format(d01, d0w1, d01w)
+        self.assertTrue(d01w<d01)
+        self.assertTrue(d0w1>d01)
+    
+
 if __name__ == '__main__':
     unittest.main()

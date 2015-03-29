@@ -97,6 +97,14 @@ def fill_colot_image_t(img, new_c_img):
     c3[:, :w] = img[:,:,2]
 
 
+def fill_image_t(img_src, img_dst):
+    h, w, s = img_dst.height, img_dst.width, img_dst.stride
+    print h, w, s
+    shape = (h, s)
+    data = numpy.ctypeslib.as_array(img_dst.data, shape=shape)
+    data[:, :w] = img_src[:,:]
+
+
 def calc_flow(img0, img1):
     h, w, c = img0.shape
     wx = lib.image_new(w, h)
@@ -128,3 +136,30 @@ def calc_flow(img0, img1):
     lib.color_image_delete(im2);
 
     return u_computed, v_computed
+
+
+def warp_image(image, u, v):
+    h, w, channels = image.shape
+    
+    im_warped = lib.color_image_new(w, h)
+    im = lib.color_image_new(w, h)
+    mask = lib.image_new(w, h)
+    wx = lib.image_new(w, h)
+    wy = lib.image_new(w, h)
+    
+    fill_image_t(u, wx.contents)
+    fill_image_t(v, wy.contents)
+    
+    fill_colot_image_t(image, im.contents)
+    
+    lib.image_warp(im_warped, mask, im, wx, wy)
+    im_warped_np = numpy_from_color_image_t(im_warped.contents)
+    
+    
+    lib.image_delete(wx)
+    lib.image_delete(wy);
+    lib.image_delete(mask);
+    lib.color_image_delete(im_warped);
+    lib.color_image_delete(im);
+    
+    return im_warped_np
