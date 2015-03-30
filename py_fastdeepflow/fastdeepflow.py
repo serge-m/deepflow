@@ -92,7 +92,6 @@ def read_flow(path):
 
 def fill_colot_image_t(img, new_c_img):
     h, w, s = new_c_img.height, new_c_img.width, new_c_img.stride
-    print h, w, s
     shape = (h, s)
     c1 = numpy.ctypeslib.as_array(new_c_img.c1, shape=shape)
     c1[:, :w] = img[:,:,0]
@@ -106,7 +105,6 @@ def fill_colot_image_t(img, new_c_img):
 
 def fill_image_t(img_src, img_dst):
     h, w, s = img_dst.height, img_dst.width, img_dst.stride
-    print h, w, s
     shape = (h, s)
     data = numpy.ctypeslib.as_array(img_dst.data, shape=shape)
     data[:, :w] = img_src[:,:]
