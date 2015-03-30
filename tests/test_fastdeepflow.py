@@ -49,6 +49,20 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(d01w<d01)
         self.assertTrue(d0w1>d01)
     
+    
+    def test_wrap_grayscale(self):
+        img0 = cv2.imread(path_dir_data + 'sintel1.png')[:,:,::-1]
+        img1 = cv2.imread(path_dir_data + 'sintel2.png')[:,:,::-1]
+        u, v = fastdeepflow.read_flow(path_dir_data + 'sintel_cmd.flo')
+        img1warped = fastdeepflow.warp_image(img1, u, v)
+
+        z = [fastdeepflow.warp_image(img1[:,:,k], u, v) for k in range(3)]
+        zz = numpy.dstack(z, )
+        
+        
+        self.assertTrue(numpy.allclose(img1warped, zz, atol=1e-8))
+
+
 
 if __name__ == '__main__':
     unittest.main()
