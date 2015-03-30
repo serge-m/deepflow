@@ -14,7 +14,7 @@ typedef __v4sf v4sf;
 #define epsilon_smooth (0.001f*0.001f)//0.000001f
 
 /* warp a color image according to a flow. src is the input image, wx and wy, the input flow. dst is the warped image and mask contains 0 or 1 if the pixels goes outside/inside image boundaries */
-void image_warp(color_image_t *dst, image_t *mask, const color_image_t *src, const image_t *wx, const image_t *wy){
+void color_image_warp(color_image_t *dst, image_t *mask, const color_image_t *src, const image_t *wx, const image_t *wy){
     int i, j, offset, incr_line = mask->stride-mask->width, x, y, x1, x2, y1, y2;
     float xx, yy, dx, dy;
     for(j=0,offset=0 ; j<src->height ; j++){
@@ -46,6 +46,46 @@ void image_warp(color_image_t *dst, image_t *mask, const color_image_t *src, con
 	            src->c3[y2*src->stride+x1]*(1.0f-dx)*dy +
 	            src->c3[y2*src->stride+x2]*dx*dy;
 	    }
+        offset += incr_line;
+    }
+}
+
+/**
+ * @brief   Warp a grayscale image according to a flow
+ *
+ * This API provides certain actions as an example.
+ *
+ * @param [in] dst  Resulting image
+ * @param [in] mask Mask contains 0 or 1 if the pixels goes outside/inside image boundaries.
+ * @param [in] src  Source image.
+ * @param [in] wx   Input flow, x-component.
+ * @param [in] wy   Input flow, y-component.
+ *
+ *
+ * @retval none
+ */
+void image_warp(image_t *dst, image_t *mask, const image_t *src, const image_t *wx, const image_t *wy){
+    int i, j, offset, incr_line = mask->stride-mask->width, x, y, x1, x2, y1, y2;
+    float xx, yy, dx, dy;
+    for(j=0,offset=0 ; j<src->height ; j++){
+        for(i=0 ; i<src->width ; i++,offset++){
+            xx = i+wx->data[offset];
+            yy = j+wy->data[offset];
+            x = floor(xx);
+            y = floor(yy);
+            dx = xx-x;
+            dy = yy-y;
+            mask->data[offset] = (xx>=0 && xx<=src->width-1 && yy>=0 && yy<=src->height-1);
+            x1 = MINMAX(x,src->width);
+            x2 = MINMAX(x+1,src->width);
+            y1 = MINMAX(y,src->height);
+            y2 = MINMAX(y+1,src->height);
+            dst->data[offset] =
+                    src->data[y1*src->stride+x1]*(1.0f-dx)*(1.0f-dy) +
+                    src->data[y1*src->stride+x2]*dx*(1.0f-dy) +
+                    src->data[y2*src->stride+x1]*(1.0f-dx)*dy +
+                    src->data[y2*src->stride+x2]*dx*dy;
+        }
         offset += incr_line;
     }
 }

@@ -31,7 +31,7 @@ void compute_one_level(image_t *wx, image_t *wy, color_image_t *im1, color_image
         *Ixx = color_image_new(width,height), *Ixy = color_image_new(width,height), *Iyy = color_image_new(width,height), *Ixz = color_image_new(width,height), *Iyz = color_image_new(width,height); // second order derivatives
   
     // warp second image
-    image_warp(w_im2, mask, im2, wx, wy);
+    color_image_warp(w_im2, mask, im2, wx, wy);
     // compute derivatives
     get_derivatives(im1, w_im2, deriv, Ix, Iy, Iz, Ixx, Ixy, Iyy, Ixz, Iyz);
     // erase du and dv

@@ -70,6 +70,13 @@ def numpy_from_color_image_t(img_t):
     return numpy.ctypeslib.as_array(img_t.c1, shape=shape).transpose(1,2,0)[:,:,:img_t.width].copy()
 
 
+def numpy_from_lib_image(img_t):
+     if type(img_t) == image_t:
+          return numpy_from_image_t(img_t)
+     if type(img_t) == color_image_t:
+          return numpy_from_color_image_t(img_t)
+     raise Exception("Unsupported input type")
+
 
 def read_flow(path):
     t = lib.readFlowFile(path)
@@ -139,10 +146,30 @@ def calc_flow(img0, img1):
 
 
 def warp_image(image, u, v):
-    h, w, channels = image.shape
+    shape = list(image.shape)
+    if len(shape) == 2:
+        shape.append(1)
+    elif len(shape) != 3:
+         raise Exception("Unsupported number of dimensions")
+    h, w, channels = shape
+
+    if channels == 3:
+         func_new_image = lib.color_image_new
+         func_fill_image = fill_colot_image_t
+         func_delete_image = lib.color_image_delete
+         func_warp = lib.color_image_warp
+    elif channels == 1:
+         func_new_image = lib.image_new
+         func_fill_image = fill_image_t
+         func_delete_image = lib.image_delete
+         func_warp = lib.image_warp
+    else:
+         raise Exception("Unsupported format")
+         
     
-    im_warped = lib.color_image_new(w, h)
-    im = lib.color_image_new(w, h)
+    im_warped = func_new_image(w, h)
+    im        = func_new_image(w, h)
+    
     mask = lib.image_new(w, h)
     wx = lib.image_new(w, h)
     wy = lib.image_new(w, h)
@@ -150,16 +177,17 @@ def warp_image(image, u, v):
     fill_image_t(u, wx.contents)
     fill_image_t(v, wy.contents)
     
-    fill_colot_image_t(image, im.contents)
+    func_fill_image(image, im.contents)
     
-    lib.image_warp(im_warped, mask, im, wx, wy)
-    im_warped_np = numpy_from_color_image_t(im_warped.contents)
-    
+    func_warp(im_warped, mask, im, wx, wy)
+    im_warped_np = numpy_from_lib_image(im_warped.contents)
     
     lib.image_delete(wx)
     lib.image_delete(wy);
     lib.image_delete(mask);
-    lib.color_image_delete(im_warped);
-    lib.color_image_delete(im);
-    
+
+    func_delete_image(im_warped);
+    func_delete_image(im);
+
     return im_warped_np
+    

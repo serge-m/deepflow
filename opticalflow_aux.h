@@ -6,7 +6,23 @@
 #include "image.h"
 
 /* warp a color image according to a flow. src is the input image, wx and wy, the input flow. dst is the warped image and mask contains 0 or 1 if the pixels goes outside/inside image boundaries */
-void image_warp(color_image_t *dst, image_t *mask, const color_image_t *src, const image_t *wx, const image_t *wy);
+void color_image_warp(color_image_t *dst, image_t *mask, const color_image_t *src, const image_t *wx, const image_t *wy);
+
+/**
+ * @brief   Warp a grayscale image according to a flow
+ *
+ * This API provides certain actions as an example.
+ *
+ * @param [in] dst  Resulting image
+ * @param [in] mask Mask contains 0 or 1 if the pixels goes outside/inside image boundaries.
+ * @param [in] src  Source image.
+ * @param [in] wx   Input flow, x-component.
+ * @param [in] wy   Input flow, y-component.
+ *
+ *
+ * @retval none
+ */
+void image_warp(image_t *dst, image_t *mask, const image_t *src, const image_t *wx, const image_t *wy);
 
 /* compute image first and second order spatio-temporal derivatives of a color image */
 void get_derivatives(const color_image_t *im1, const color_image_t *im2, const convolution_t *deriv, color_image_t *dx, color_image_t *dy, color_image_t *dt, color_image_t *dxx, color_image_t *dxy, color_image_t *dyy, color_image_t *dxt, color_image_t *dyt);
