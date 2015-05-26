@@ -6,6 +6,9 @@
 #include "opticalflow.h"
 #include "io.h"
 
+int load_matches_from_file(image_t *match_x, image_t *match_y, image_t *match_z, int wm, int hm,
+                           const char *path_match_file);
+
 void usage(){
     printf("usage:\n");
     printf("./deepflow image1 image2 outputfile [options] \n");
@@ -167,29 +170,18 @@ int main(int argc, char ** argv){
 	            hm = 256;
 	        }
             image_delete(match_x); image_delete(match_y); image_delete(match_z);
-            match_x = image_new(wm, hm); match_y = image_new(wm, hm); match_z = image_new(wm, hm); 
-            image_erase(match_x); image_erase(match_y); image_erase(match_z);
-            FILE *fid = stdin;
+            match_x = image_new(wm, hm); match_y = image_new(wm, hm); match_z = image_new(wm, hm);
 
+            char *path_match_file = 0;
 	        if( current_arg<argc && argv[current_arg][0] != '-'){
-	            fid = fopen(argv[current_arg++], "r");
-	            if(fid==NULL){
-		            fprintf(stderr, "Cannot read matches from file %s", argv[current_arg-1]);
-		            exit(1);
-		        }
+	            path_match_file = argv[current_arg++];
 	        }
-	        int x1, x2, y1, y2;
-	        float score;
-	        while(!feof(fid) && fscanf(fid, "%d %d %d %d %f\n", &x1, &y1, &x2, &y2, &score)==5){
-	            if( x1<0 || y1<0 || x2<0 || y2<0 || x1>=wm || y1>=hm || x2>=wm || y2>=hm){
-		            fprintf(stderr, "Error while reading matches %d %d -> %d %d, out of bounds\n", x1, y1, x2, y2);
-		            exit(1);
-		        }
-	            match_x->data[ y1*match_x->stride+x1 ] = (float) (x2-x1);
-	            match_y->data[ y1*match_x->stride+x1 ] = (float) (y2-y1);
-	            match_z->data[ y1*match_x->stride+x1 ] = score;
-	        }
-	    }else if ( !strcmp(argv[current_arg],"-sintel") ){
+
+            int load_result = load_matches_from_file(match_x, match_y, match_z, wm, hm, path_match_file);
+            if( load_result != 0 ) {
+                exit(load_result);
+            }
+        }else if ( !strcmp(argv[current_arg],"-sintel") ){
 		    current_arg++;
 	        optical_flow_params_sintel(params);
 	    }else if ( !strcmp(argv[current_arg],"-middlebury") ){
@@ -217,5 +209,34 @@ int main(int argc, char ** argv){
     color_image_delete(im1); color_image_delete(im2);
     free(params);
 
+    return 0;
+}
+
+int load_matches_from_file(image_t *match_x, image_t *match_y, image_t *match_z, int wm, int hm,
+                           const char *path_match_file) {
+    FILE *fid = stdin;
+    if( path_match_file != 0 ){
+                fid = fopen(path_match_file, "r");
+                if(fid==NULL){
+                    fprintf(stderr, "Cannot read matches from file %s", path_match_file);
+                    return 1;
+                }
+            }
+
+    image_erase(match_x);
+    image_erase(match_y);
+    image_erase(match_z);
+
+    int x1, x2, y1, y2;
+    float score;
+    while(!feof(fid) && fscanf(fid, "%d %d %d %d %f\n", &x1, &y1, &x2, &y2, &score)==5){
+	            if( x1<0 || y1<0 || x2<0 || y2<0 || x1>=wm || y1>=hm || x2>=wm || y2>=hm){
+		            fprintf(stderr, "Error while reading matches %d %d -> %d %d, out of bounds\n", x1, y1, x2, y2);
+                    return 1;
+		        }
+	            match_x->data[ y1*match_x->stride+x1 ] = (float) (x2-x1);
+	            match_y->data[ y1*match_x->stride+x1 ] = (float) (y2-y1);
+	            match_z->data[ y1*match_x->stride+x1 ] = score;
+	        }
     return 0;
 }
