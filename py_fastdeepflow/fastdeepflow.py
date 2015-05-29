@@ -110,7 +110,7 @@ def fill_image_t(img_src, img_dst):
     data[:, :w] = img_src[:,:]
 
 
-def calc_flow(img0, img1):
+def calc_flow(img0, img1, params=None):
     h, w, c = img0.shape
     wx = lib.image_new(w, h)
     wy = lib.image_new(w, h)
@@ -123,8 +123,9 @@ def calc_flow(img0, img1):
 
     match_x, match_y, match_z = [ctypes.POINTER(image_t)(),] *3
 
-    params = optical_flow_params_t()
-    lib.optical_flow_params_default(ctypes.byref(params))
+    if params is None:
+        params = optical_flow_params_t()
+        lib.optical_flow_params_default(ctypes.byref(params))
 
     lib.optical_flow(wx, wy, im1, im2, ctypes.byref(params), match_x, match_y, match_z);
 
