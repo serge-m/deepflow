@@ -60,6 +60,14 @@ class TestParameters(unittest.TestCase):
 
         self.assertTrue(numpy.array_equal(numpy.array(flow), numpy.array(flow_reference)))
 
+    def test_preset_loader(self):
+        img0, img1, flow_reference = self.prepare(dir_name='48_0', path_flow_reference='48_midl_minsize10.flo')
+
+        params = fastdeepflow.create_params("middlebury")
+        params.min_size = 10
+        flow = fastdeepflow.calc_flow(img0, img1, params)
+
+        self.assertTrue(numpy.array_equal(numpy.array(flow), numpy.array(flow_reference)))
 
 if __name__ == '__main__':
     unittest.main()

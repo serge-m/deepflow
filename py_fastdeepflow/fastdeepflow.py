@@ -52,6 +52,23 @@ lib.color_image_new.restype = ctypes.POINTER(color_image_t)
 lib.image_new.restype = ctypes.POINTER(image_t)
 
 
+def create_params(preset="default"):
+    """
+    Create instance of optical flow parameters according to one of predefined presets
+    :param preset: string, available values: default, sintel, middlebury, kitti
+    :return:
+    """
+
+    dict_generators = dict(default=lib.optical_flow_params_default,
+                           sintel=lib.optical_flow_params_sintel,
+                           middlebury=lib.optical_flow_params_middlebury,
+                           kitti=lib.optical_flow_params_kitti)
+    params = optical_flow_params_t()
+    func = dict_generators[preset]
+
+    func(ctypes.byref(params))
+    return params
+
 
 def numpy_from_image_t(img_t):
     full = numpy.ctypeslib.as_array(img_t.data, shape=(img_t.height, img_t.stride))
