@@ -126,7 +126,7 @@ def calc_flow(img0, img1):
     params = optical_flow_params_t()
     lib.optical_flow_params_default(ctypes.byref(params))
 
-    lib.optical_flow(wx, wy, im1, im2, params, match_x, match_y, match_z);
+    lib.optical_flow(wx, wy, im1, im2, ctypes.byref(params), match_x, match_y, match_z);
 
 
     u_computed = numpy_from_image_t(wx.contents)
