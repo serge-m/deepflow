@@ -111,6 +111,14 @@ def fill_image_t(img_src, img_dst):
 
 
 def calc_flow(img0, img1, params=None):
+    """
+    Calculate optical flow between two images. For each pixel in the source image the algorithm searches for
+    corresponding location in the reference image.
+    :param img0: Source image
+    :param img1: Reference image
+    :param params: parameters of optical flow algorithm
+    :return: (u, v) tuple for horizontal (u) and vertical (v) components of optical flow
+    """
     h, w, c = img0.shape
     wx = lib.image_new(w, h)
     wy = lib.image_new(w, h)
@@ -121,25 +129,24 @@ def calc_flow(img0, img1, params=None):
     fill_colot_image_t(img0, im1.contents)
     fill_colot_image_t(img1, im2.contents)
 
-    match_x, match_y, match_z = [ctypes.POINTER(image_t)(),] *3
+    match_x, match_y, match_z = [ctypes.POINTER(image_t)(),] * 3
 
     if params is None:
         params = optical_flow_params_t()
         lib.optical_flow_params_default(ctypes.byref(params))
 
-    lib.optical_flow(wx, wy, im1, im2, ctypes.byref(params), match_x, match_y, match_z);
-
+    lib.optical_flow(wx, wy, im1, im2, ctypes.byref(params), match_x, match_y, match_z)
 
     u_computed = numpy_from_image_t(wx.contents)
     v_computed = numpy_from_image_t(wy.contents)
 
     lib.image_delete(wx)
-    lib.image_delete(wy);
-    lib.image_delete(match_x);
-    lib.image_delete(match_y);
-    lib.image_delete(match_z);
-    lib.color_image_delete(im1);
-    lib.color_image_delete(im2);
+    lib.image_delete(wy)
+    lib.image_delete(match_x)
+    lib.image_delete(match_y)
+    lib.image_delete(match_z)
+    lib.color_image_delete(im1)
+    lib.color_image_delete(im2)
 
     return u_computed, v_computed
 
