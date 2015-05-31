@@ -9,7 +9,7 @@
 image_t** readFlowFile(const char* filename);
 
 /* write a flow to a file */
-void writeFlowFile(const char* filename, const image_t *flowx, const image_t *flowy);
+int writeFlowFile(const char* filename, const image_t *flowx, const image_t *flowy);
 
 /* load a color image from a file in jpg or ppm*/
 color_image_t *color_image_load(const char *fname);

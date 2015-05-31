@@ -44,6 +44,8 @@ class optical_flow_params_t(ctypes.Structure):
 
 lib.readFlowFile.restype = ctypes.POINTER(ctypes.POINTER(image_t))
 lib.readFlowFile.argtypes = [ctypes.c_char_p]
+lib.writeFlowFile.restype = ctypes.c_int
+
 lib.color_image_load.restype = ctypes.POINTER(color_image_t)
 lib.color_image_load.argtypes = [ctypes.c_char_p]
 lib.image_delete.restype = None
@@ -105,6 +107,37 @@ def read_flow(path):
     lib.image_delete(t[1])
 
     return u, v
+
+
+def write_flow(path, u, v):
+    """
+    Save optical flow (u,v) to .flo file.
+    :param path: destination path
+    :param u: x component of optical flow
+    :param v: y component of optical flow
+    :return: None
+    """
+    if u.shape != v.shape:
+        raise Exception("Shapes of x- and y-components of optical flow must match")
+
+    if u.ndim != 2:
+        raise Exception("Input optical flow components must me 2-dimensional")
+
+    h, w = u.shape
+
+    wx = lib.image_new(w, h)
+    wy = lib.image_new(w, h)
+
+    fill_image_t(u, wx.contents)
+    fill_image_t(v, wy.contents)
+
+    res = lib.writeFlowFile(path, wx, wy)
+
+    if res != 0:
+        raise Exception("Failed to save optical flow")
+
+    lib.image_delete(wx)
+    lib.image_delete(wy)
 
 
 def fill_colot_image_t(img, new_c_img):

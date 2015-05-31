@@ -202,7 +202,11 @@ int main(int argc, char ** argv){
 	
     image_t *wx = image_new(im1->width,im1->height), *wy = image_new(im1->width,im1->height);
     optical_flow(wx, wy, im1, im2, params, match_x, match_y, match_z);
-    writeFlowFile(argv[3], wx, wy);
+    const char *dst_filename = argv[3];
+    if (writeFlowFile(dst_filename, wx, wy) != 0) {
+        fprintf(stderr, "Error while opening %s\n", dst_filename);
+        exit(1);
+    }
     image_delete(wx);
     image_delete(wy);
     image_delete(match_x); image_delete(match_y); image_delete(match_z);

@@ -12,8 +12,7 @@
 image_t** readFlowFile(const char* filename){
     FILE *fid = fopen(filename, "rb");
     if (fid == 0){
-        fprintf(stderr,"readFlow() error: could not open file  %s\n",filename);
-        exit(1);
+        return 0;
     }
     float help;
     fread(&help,sizeof(float),1,fid);
@@ -34,11 +33,10 @@ image_t** readFlowFile(const char* filename){
 }
 
 /* write a flow to a file */
-void writeFlowFile(const char *filename, const image_t *flowx, const image_t *flowy){
+int writeFlowFile(const char *filename, const image_t *flowx, const image_t *flowy){
     FILE *stream = fopen(filename, "wb");
-    if (stream == 0){
-        fprintf(stderr, "Error while opening %s\n",filename);
-        exit(1);
+    if (stream == 0) {
+        return 1;
     }
     const float help=202021.25;
     fwrite(&help,sizeof(float),1,stream);
@@ -52,6 +50,7 @@ void writeFlowFile(const char *filename, const image_t *flowx, const image_t *fl
 	        fwrite(&flowy->data[y*flowy->stride+x],sizeof(float),1,stream);
         }
     fclose(stream);
+    return 0;
 }
 
 /* IMAGE */
