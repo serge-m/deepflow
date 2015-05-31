@@ -63,20 +63,35 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(numpy.allclose(img1warped, zz, atol=1e-8))
 
 
-class TestIO(unittest.TestCase):
+class ReadyFlow(unittest.TestCase):
+    def setUp(self):
+        self.u, self.v = fastdeepflow.read_flow(path_dir_data + 'sintel_cmd.flo')
+        self.assertTrue(self.u.max()-self.u.min()>5)
+
+
+class TestIO(ReadyFlow):
     def test_read_write(self):
         path_tmp_flow = os.path.join(path_dir_data, 'flow_read_write_test.flo')
         if os.path.exists(path_tmp_flow):
             os.remove(path_tmp_flow)
         self.assertFalse(os.path.exists(path_tmp_flow))
 
-        u, v = fastdeepflow.read_flow(path_dir_data + 'sintel_cmd.flo')
-        self.assertTrue(u.shape == v.shape)
-        fastdeepflow.write_flow(path_tmp_flow, u, v)
+        self.assertEqual(self.u.shape, self.v.shape)
+
+        fastdeepflow.write_flow(path_tmp_flow, self.u, self.v)
         self.assertTrue(os.path.exists(path_tmp_flow))
         u_loaded, v_loaded = fastdeepflow.read_flow(path_tmp_flow)
-        self.assertTrue(numpy.array_equal(u, u_loaded))
-        self.assertTrue(numpy.array_equal(v, v_loaded))
+        self.assertTrue(numpy.array_equal(self.u, u_loaded))
+        self.assertTrue(numpy.array_equal(self.v, v_loaded))
+
+
+class TestExceptions(ReadyFlow):
+    def test_read_write(self):
+        with self.assertRaises(Exception):
+            fastdeepflow.write_flow('123123/123/123123', self.u, self.v)
+
+        with self.assertRaises(Exception):
+            res = fastdeepflow.read_flow('123123/234234')
 
 
 if __name__ == '__main__':

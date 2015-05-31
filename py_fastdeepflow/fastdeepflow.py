@@ -100,6 +100,9 @@ def numpy_from_lib_image(img_t):
 def read_flow(path):
     t = lib.readFlowFile(path)
 
+    if not t:
+        raise Exception("Failed to load optical flow from file")
+
     u = numpy_from_image_t(t[0].contents)
     v = numpy_from_image_t(t[1].contents)
 
