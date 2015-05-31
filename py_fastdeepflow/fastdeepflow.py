@@ -133,11 +133,11 @@ def write_flow(path, u, v):
 
     res = lib.writeFlowFile(path, wx, wy)
 
-    if res != 0:
-        raise Exception("Failed to save optical flow")
-
     lib.image_delete(wx)
     lib.image_delete(wy)
+
+    if res != 0:
+        raise Exception("Failed to save optical flow")
 
 
 def fill_colot_image_t(img, new_c_img):
