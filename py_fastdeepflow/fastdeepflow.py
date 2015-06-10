@@ -248,5 +248,9 @@ def warp_image(image, u, v):
     func_delete_image(im_warped);
     func_delete_image(im);
 
+    assert (0 <= im_warped_np.shape[0] - h <= 2)
+    assert (0 <= im_warped_np.shape[1] - w <= 2)
+    im_warped_np = im_warped_np[:h, :w]
+    assert (im_warped_np.ndim == 2 and channels == 1 or im_warped_np.ndim == 3 and im_warped_np.shape[-1] == channels)
     return im_warped_np
     
